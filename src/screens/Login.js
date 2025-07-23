@@ -11,7 +11,7 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  View
+  View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -34,18 +34,24 @@ const Login = ({ navigation }) => {
         password: password,
       });
 
+      console.log('Login response:', response.data);
+
       if (response.data.success) {
         await AsyncStorage.setItem('nombre_residente', response.data.nombre_residente);
         await AsyncStorage.setItem('username', emailOrPhone);
+        await AsyncStorage.setItem('controles', JSON.stringify(response.data.controles));
 
-        // Guardar controles incluyendo topic
-        const controlesString = JSON.stringify(response.data.controles);
-        await AsyncStorage.setItem('controles', controlesString);
-
-        navigation.reset({
-          index: 0,
-          routes: [{ name: 'Home' }],
-        });
+        if (Number(response.data.primera_vez) === 1) {
+          navigation.reset({
+            index: 0,
+            routes: [{ name: 'ChangePassword' }],
+          });
+        } else {
+          navigation.reset({
+            index: 0,
+            routes: [{ name: 'Home' }],
+          });
+        }
       } else {
         alert('Usuario o contraseña incorrectos');
       }
@@ -63,7 +69,7 @@ const Login = ({ navigation }) => {
 
           <Image
             source={{
-              uri: 'https://josesilva.es/wp-content/uploads/2023/03/URBANIZACIONES-RESIDENCIALES-LAS-FORTALEZAS-DEL-SIGLO-XXI.jpg',
+              uri: 'https://scontent.fgdl1-3.fna.fbcdn.net/v/t39.30808-6/475545737_1075152864416501_8205349774076146612_n.jpg?_nc_cat=105&ccb=1-7&_nc_sid=6ee11a&_nc_ohc=jbsag2AnPV0Q7kNvwGTR4oV&_nc_oc=AdmPh2aMwOXv6WCqXicqYyMUKzGny2HW596gbdxu7A_iDWSpFVkADPpuxVQGhfVvHd8&_nc_zt=23&_nc_ht=scontent.fgdl1-3.fna&_nc_gid=IFl1E3y3FWysoRxoyrkv0A&oh=00_AfRAVJFFmfwusW795X1zVS3VLbmqfjpRRHIuIu_VpobI2w&oe=68858FE8',
             }}
             style={styles.image}
           />

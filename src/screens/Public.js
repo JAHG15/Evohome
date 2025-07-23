@@ -122,12 +122,12 @@ const Public = ({ navigation }) => {
 
           {/* Imágenes agregadas debajo del mapa */}
           <Image
-            source={{ uri: 'https://scontent.fntr12-1.fna.fbcdn.net/v/t39.30808-6/501329334_1162817665650020_1119024762628499184_n.jpg?_nc_cat=109&ccb=1-7&_nc_sid=127cfc&_nc_ohc=7Zsce6maUG4Q7kNvwFIC_dA&_nc_oc=Adnkzn5NfXWbSBW6AzRqgn6AjVolurz660RGIVBVkBe1_mMcUUuWbYdI0bt4n11DMqPkAbe24SSU_TysH4isYIqr&_nc_zt=23&_nc_ht=scontent.fntr12-1.fna&_nc_gid=UrSkpxf8sOZfagidNhhKTA&oh=00_AfPkmCm32zysvfswAVN-qjsxrW9epmWMeGYymiuIoxasAw&oe=68579F7F' }}
+            source={{ uri: 'https://scontent.fgdl1-4.fna.fbcdn.net/v/t39.30808-6/501329334_1162817665650020_1119024762628499184_n.jpg?_nc_cat=109&ccb=1-7&_nc_sid=127cfc&_nc_ohc=OAtqN_mNlLsQ7kNvwHNxS_u&_nc_oc=Adm1mPggK9UwTCAukhomw94ab1k5p11iV02_0CUw_YLRzbBhWvA7c5tzbsJCkVYoLBA&_nc_zt=23&_nc_ht=scontent.fgdl1-4.fna&_nc_gid=SD9IikcADPUYKVtrWhD72A&oh=00_AfS29PyhR1_kKhjHyK3VxgkGyye_VPy2Y5bfH5rmxRruHw&oe=68858BBF' }}
             style={styles.extraImage}
             resizeMode="cover"
           />
           <Image
-            source={{ uri: 'https://scontent.fntr12-1.fna.fbcdn.net/v/t39.30808-6/494268710_1151920263406427_3918560722729818492_n.jpg?_nc_cat=102&ccb=1-7&_nc_sid=127cfc&_nc_ohc=LFjOsapOL_AQ7kNvwGkUErv&_nc_oc=AdktESRVRge-k_dvXOgvnm8X4Lye8rJ88mI-eWY6ObHi3q9M7gQ7HqdXL_P_WaoCYlEhxgVvSLUeep6pD_1IRHJq&_nc_zt=23&_nc_ht=scontent.fntr12-1.fna&_nc_gid=B_k8rnU1xNBc2mHvk4dDuA&oh=00_AfNM1jtVSi0yWHjSnWrCJlM315mVVN8608eLVQb2aeNhHg&oe=6857AA69' }}
+            source={{ uri: 'https://scontent.fgdl1-4.fna.fbcdn.net/v/t39.30808-6/494268710_1151920263406427_3918560722729818492_n.jpg?_nc_cat=102&ccb=1-7&_nc_sid=127cfc&_nc_ohc=q1Euknt-zu4Q7kNvwFZeEQL&_nc_oc=AdkDg_8XXr3F5wHNOpRvHGuZKssmthPVe5DRI-tBsYAh65hYJWIicZYJGL7eFeBFitY&_nc_zt=23&_nc_ht=scontent.fgdl1-4.fna&_nc_gid=9xlLsQ5eK9TWZBRHMIDDHg&oh=00_AfQhKLTtxMF9LsXSFPUbPgai0ry_WdcOwJ-S1QMMuWakUg&oe=688596A9' }}
             style={styles.extraImage}
             resizeMode="cover"
           />

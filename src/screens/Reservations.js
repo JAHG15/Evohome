@@ -19,6 +19,8 @@ const Reservations = () => {
   const [nombreResidente, setNombreResidente] = useState('');
 
   useEffect(() => {
+    let intervalId;
+
     const fetchData = async () => {
       try {
         const nombre = await AsyncStorage.getItem('nombre_residente');
@@ -29,22 +31,34 @@ const Reservations = () => {
         setUnavailableDates(datos);
       } catch (error) {
         console.error('Error al obtener datos:', error);
-        Alert.alert('Error', 'No se pudo obtener la información del servidor');
       }
     };
 
+    // Llamar al montar
     fetchData();
+
+    // Actualizar cada 2 segundos
+    intervalId = setInterval(() => {
+      fetchData();
+    }, 2000);
+
+    // Limpiar intervalo al desmontar
+    return () => clearInterval(intervalId);
   }, []);
 
   const isUnavailable = (dateString) => {
-    return unavailableDates.some(item => item.fecha === dateString && item.status === 'activa');
+    const today = new Date().toISOString().split('T')[0];
+    return unavailableDates.some(
+      item => item.fecha === dateString && item.status === 'activa' && item.fecha >= today
+    );
   };
 
   const getMarkedDates = () => {
     const marks = {};
+    const today = new Date().toISOString().split('T')[0];
 
     unavailableDates.forEach(item => {
-      if (item.status === 'activa') {
+      if (item.status === 'activa' && item.fecha >= today) {
         marks[item.fecha] = {
           disabled: true,
           disableTouchEvent: true,
@@ -78,7 +92,7 @@ const Reservations = () => {
         const res = await axios.post('https://inmortalz.shop/evohome-api/addReservation.php', {
           fecha: selectedDate,
           residente: nombreResidente,
-          status: 'activa' // Opcional, ya lo pone el servidor
+          status: 'activa'
         });
 
         if (res.data.success) {
@@ -114,8 +128,8 @@ const Reservations = () => {
       </View>
 
       <Calendar
-        current={'2025-01-01'}
-        minDate={'2025-01-01'}
+        current={new Date().toISOString().split('T')[0]}
+        minDate={new Date().toISOString().split('T')[0]}
         maxDate={'2025-12-31'}
         onDayPress={(day) => {
           const today = new Date().toISOString().split('T')[0];
@@ -209,4 +223,3 @@ const styles = StyleSheet.create({
 });
 
 export default Reservations;
-

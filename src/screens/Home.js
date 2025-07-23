@@ -6,19 +6,25 @@ import * as Location from 'expo-location';
 import mqtt from 'mqtt';
 import React, { useEffect, useState } from 'react';
 import {
+  Dimensions,
   Image,
   Linking,
+  Modal,
   ScrollView,
   StyleSheet,
   Switch,
   Text,
   TouchableOpacity,
+  TouchableWithoutFeedback,
   View,
 } from 'react-native';
 
+const { width, height } = Dimensions.get('window');
+const IMAGE_SIZE = width * 0.9;
+const iconSize = width * 0.065;
+
 const Home = ({ navigation }) => {
   const [menuVisible, setMenuVisible] = useState(false);
-  const [profileImage, setProfileImage] = useState(null);
   const [nombreResidente, setNombreResidente] = useState(null);
   const [controles, setControles] = useState([]);
   const [switches, setSwitches] = useState({});
@@ -26,6 +32,10 @@ const Home = ({ navigation }) => {
   const [username, setUsername] = useState(null);
   const [weatherData, setWeatherData] = useState(null);
   const [loadingWeather, setLoadingWeather] = useState(true);
+  const [modalVisible, setModalVisible] = useState(false);
+
+  const fixedImageUri =
+    'https://scontent.fgdl1-3.fna.fbcdn.net/v/t39.30808-6/475545737_1075152864416501_8205349774076146612_n.jpg?_nc_cat=105&ccb=1-7&_nc_sid=6ee11a&_nc_ohc=jbsag2AnPV0Q7kNvwGTR4oV&_nc_oc=AdmPh2aMwOXv6WCqXicqYyMUKzGny2HW596gbdxu7A_iDWSpFVkADPpuxVQGhfVvHd8&_nc_zt=23&_nc_ht=scontent.fgdl1-3.fna&_nc_gid=IFl1E3y3FWysoRxoyrkv0A&oh=00_AfRAVJFFmfwusW795X1zVS3VLbmqfjpRRHIuIu_VpobI2w&oe=68858FE8';
 
   const toggleSwitch = async (key, topic) => {
     const newState = !switches[key];
@@ -57,14 +67,10 @@ const Home = ({ navigation }) => {
       const storedNombre = await AsyncStorage.getItem('nombre_residente');
       setNombreResidente(storedNombre);
 
-      const storedImage = await AsyncStorage.getItem(`profileImage_${storedUsername}`);
-      setProfileImage(storedImage || 'https://randomuser.me/api/portraits/men/1.jpg');
-
       const controlesJSON = await AsyncStorage.getItem('controles');
       const parsedControles = controlesJSON ? JSON.parse(controlesJSON) : [];
       setControles(parsedControles);
 
-      // Cargar switches por usuario
       const storedSwitchesJSON = await AsyncStorage.getItem(`switches_${storedUsername}`);
       const storedSwitches = storedSwitchesJSON ? JSON.parse(storedSwitchesJSON) : {};
 
@@ -81,8 +87,15 @@ const Home = ({ navigation }) => {
     }
   };
 
-  useEffect(() => { loadProfileData(); }, []);
-  useFocusEffect(React.useCallback(() => { loadProfileData(); }, []));
+  useEffect(() => {
+    loadProfileData();
+  }, []);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      loadProfileData();
+    }, [])
+  );
 
   useEffect(() => {
     const fetchWeather = async () => {
@@ -120,7 +133,6 @@ const Home = ({ navigation }) => {
       await AsyncStorage.removeItem('username');
       await AsyncStorage.removeItem('nombre_residente');
       await AsyncStorage.removeItem('controles');
-      // No borres los switches aquí para que se mantengan
       navigation.reset({ index: 0, routes: [{ name: 'Public' }] });
     } catch (error) {
       console.log('Error al cerrar sesión:', error);
@@ -130,22 +142,23 @@ const Home = ({ navigation }) => {
   return (
     <LinearGradient colors={['#0072E6', '#000']} style={styles.container}>
       <View style={{ flex: 1 }}>
+        {/* Header */}
         <View style={styles.header}>
-          <TouchableOpacity onPress={() => navigation.navigate('Profile', { currentImage: profileImage })}>
-            <Image source={{ uri: profileImage }} style={styles.avatar} />
+          <TouchableOpacity onPress={() => setModalVisible(true)}>
+            <Image source={{ uri: fixedImageUri }} style={styles.avatar} />
           </TouchableOpacity>
 
           <Text style={styles.greeting}>Hola, {nombreResidente || 'Residente'}!</Text>
 
           <View style={styles.rightIcons}>
             <TouchableOpacity onPress={() => navigation.navigate('Reservations')} style={styles.iconButton}>
-              <Ionicons name="calendar-outline" size={26} color="white" />
+              <Ionicons name="calendar-outline" size={iconSize} color="white" />
             </TouchableOpacity>
             <TouchableOpacity onPress={openWhatsApp} style={styles.iconButton}>
-              <Feather name="message-circle" size={26} color="#25D366" />
+              <Feather name="message-circle" size={iconSize} color="#25D366" />
             </TouchableOpacity>
             <TouchableOpacity onPress={() => setMenuVisible(!menuVisible)} style={styles.iconButton}>
-              <Feather name="menu" size={28} color="white" />
+              <Feather name="menu" size={iconSize + 2} color="white" />
             </TouchableOpacity>
           </View>
         </View>
@@ -158,7 +171,20 @@ const Home = ({ navigation }) => {
           </View>
         )}
 
+        {/* Modal de Imagen */}
+        <Modal animationType="fade" transparent visible={modalVisible} onRequestClose={() => setModalVisible(false)}>
+          <TouchableWithoutFeedback onPress={() => setModalVisible(false)}>
+            <View style={styles.modalBackground}>
+              <TouchableWithoutFeedback>
+                <Image source={{ uri: fixedImageUri }} style={styles.modalImage} resizeMode="cover" />
+              </TouchableWithoutFeedback>
+            </View>
+          </TouchableWithoutFeedback>
+        </Modal>
+
+        {/* Scroll principal */}
         <ScrollView contentContainerStyle={styles.scroll}>
+          {/* Clima */}
           <LinearGradient colors={['#004080', '#000']} style={styles.weatherCard}>
             <Text style={styles.location}>{weatherData?.location?.name || 'Ubicación'}</Text>
             <View style={styles.weatherContent}>
@@ -167,7 +193,7 @@ const Home = ({ navigation }) => {
               ) : weatherData ? (
                 <>
                   <Text style={styles.temperature}>{Math.round(weatherData.current.temp_c)}°</Text>
-                  <Ionicons name="sunny" size={40} color="yellow" />
+                  <Ionicons name="sunny" size={iconSize * 1.5} color="yellow" />
                 </>
               ) : (
                 <Text style={styles.temperature}>No disponible</Text>
@@ -175,6 +201,7 @@ const Home = ({ navigation }) => {
             </View>
           </LinearGradient>
 
+          {/* Controles */}
           <Text style={styles.sectionTitle}>Controles</Text>
           <LinearGradient colors={['#0072E6', '#000']} style={styles.controlCard}>
             {controles.map(({ control, topic }) => (
@@ -192,29 +219,87 @@ const Home = ({ navigation }) => {
 
 export default Home;
 
+// ==============================
+// ESTILOS
+// ==============================
+
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  scroll: { padding: 20, paddingTop: 135 },
+  scroll: { paddingHorizontal: width * 0.05, paddingTop: height * 0.2, paddingBottom: height * 0.05 },
   header: {
-    position: 'absolute', top: 70, left: 20, right: 20,
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', zIndex: 10,
+    position: 'absolute',
+    top: height * 0.08,
+    left: width * 0.05,
+    right: width * 0.05,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    zIndex: 10,
   },
-  avatar: { width: 50, height: 50, borderRadius: 25 },
-  greeting: { flex: 1, color: 'white', fontSize: 25, fontWeight: 'bold', marginLeft: 10 },
+  avatar: {
+    width: width * 0.13,
+    height: width * 0.13,
+    borderRadius: (width * 0.13) / 2,
+  },
+  greeting: {
+    flex: 1,
+    color: 'white',
+    fontSize: width * 0.06,
+    fontWeight: 'bold',
+    marginLeft: width * 0.03,
+  },
   rightIcons: { flexDirection: 'row', alignItems: 'center' },
-  iconButton: { padding: 8 },
+  iconButton: { padding: width * 0.015 },
   menu: {
-    position: 'absolute', top: 90, right: 20, backgroundColor: 'black',
-    padding: 10, borderRadius: 10, zIndex: 20,
+    position: 'absolute',
+    top: height * 0.11,
+    right: width * 0.05,
+    backgroundColor: 'black',
+    padding: width * 0.03,
+    borderRadius: 10,
+    zIndex: 20,
   },
   menuItem: { paddingVertical: 8 },
-  menuItemText: { color: 'white', fontSize: 17.5 },
-  weatherCard: { borderRadius: 15, padding: 15, marginTop: 20 },
-  location: { color: 'white', fontSize: 16 },
-  weatherContent: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  temperature: { fontSize: 40, color: 'white' },
-  sectionTitle: { color: 'white', fontSize: 20, fontWeight: 'bold', marginVertical: 20 },
-  controlCard: { width: '100%', borderRadius: 15, padding: 15 },
-  switchRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 },
-  switchText: { color: 'white', fontSize: 14 },
+  menuItemText: { color: 'white', fontSize: width * 0.045 },
+  weatherCard: {
+    borderRadius: 15,
+    padding: width * 0.04,
+    marginTop: height * 0.015,
+  },
+  location: { color: 'white', fontSize: width * 0.04 },
+  weatherContent: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  temperature: { fontSize: width * 0.1, color: 'white' },
+  sectionTitle: {
+    color: 'white',
+    fontSize: width * 0.05,
+    fontWeight: 'bold',
+    marginVertical: height * 0.025,
+  },
+  controlCard: {
+    width: '100%',
+    borderRadius: 15,
+    padding: width * 0.04,
+  },
+  switchRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: height * 0.015,
+  },
+  switchText: { color: 'white', fontSize: width * 0.04 },
+  modalBackground: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.8)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalImage: {
+    width: IMAGE_SIZE,
+    height: IMAGE_SIZE,
+    borderRadius: IMAGE_SIZE / 2,
+  },
 });
